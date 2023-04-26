@@ -28,26 +28,30 @@ class Watcher(object):
         return repo_url.replace("!colon!", ":")
 
     def set(self, repo_url, branches, webhook_url, webhook_auth):
-        branch_json = []
+        try:
+            branch_json = []
 
-        for branch in branches:
-            branch_json.append({
-                "branch_name": branch,
-                "last_commit_sha": ""
-            })
+            for branch in branches:
+                branch_json.append({
+                    "branch_name": branch,
+                    "last_commit_sha": ""
+                })
 
-        repo = {
-            "branches": branch_json,
-            "webhook": {
-                "url": webhook_url,
-                "auth": webhook_auth
+            repo = {
+                "branches": branch_json,
+                "webhook": {
+                    "url": webhook_url,
+                    "auth": webhook_auth
+                }
             }
-        }
 
-        self.connection.json().set(f"repo_url:{self.safe_repo_url(repo_url)}", Path.root_path(), repo)
-        self.connection.bgsave()
+            self.connection.json().set(f"repo_url:{self.safe_repo_url(repo_url)}", Path.root_path(), repo)
+            self.connection.bgsave()
+        except Exception as ex:
+            reason = ex
+            return False, ex
 
-        return True
+        return True, None
 
     def update_commit_sha(self, repo_url, branch_name, commit_sha):
         self.connection.json().set(f"repo_url:{self.safe_repo_url(repo_url)}", ".branches[?(@branch_name == '%s')].last_commit_sha" % branch_name, commit_sha)

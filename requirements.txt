@@ -1,3 +1,7 @@
 python-dotenv
 gitpython
 redis
+Flask
+flask_restful
+testresources
+requests
